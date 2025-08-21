@@ -1,0 +1,1075 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.header h1 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-size: 2.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header p {
+    color: #4a5568;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+/* Form Styling */
+.form-section {
+    margin-bottom: 30px;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card h3 {
+    color: #2d3748;
+    margin-bottom: 25px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+/* Buttons */
+.button-section {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 18px 40px;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+}
+
+.btn-ai, .btn-astrology {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    padding: 16px 32px;
+    border-radius: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    margin: 25px auto 15px;
+}
+
+.btn-astrology {
+    background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+    box-shadow: 0 8px 25px rgba(159, 122, 234, 0.3);
+}
+
+.btn-ai:hover:not(:disabled),
+.btn-astrology:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+}
+
+.btn-ai:disabled, .btn-astrology:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Results Section */
+.results-section {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    margin-top: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.score-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.8rem;
+    font-weight: bold;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.score-circle.astrology {
+    background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+    box-shadow: 0 10px 30px rgba(159, 122, 234, 0.3);
+    width: 120px;
+    height: 120px;
+    font-size: 1.6rem;
+}
+
+.score-text {
+    text-align: center;
+}
+
+.score-interpretation h3 {
+    color: #2d3748;
+    margin-bottom: 12px;
+    font-size: 1.6rem;
+}
+
+.score-interpretation p {
+    color: #4a5568;
+    font-size: 1.1rem;
+}
+
+/* Multi-Dimensional Analysis Styling */
+.breakdown-section h3 {
+    color: #2d3748;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 1.4rem;
+}
+
+/* Directional Recommendations Section */
+.directional-recommendations {
+    margin-bottom: 30px;
+}
+
+.recommendation-card {
+    background: linear-gradient(135deg, #f8faff 0%, #e8f4fd 100%);
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-left: 5px solid #667eea;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.recommendation-card h4 {
+    color: #2d3748;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.recommendation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.recommendation-section h5 {
+    color: #4a5568;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.direction-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.direction-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.direction-badge.best {
+    background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+    color: #22543d;
+    border: 2px solid #48bb78;
+}
+
+.direction-badge.lucky {
+    background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+    color: #2a4365;
+    border: 2px solid #4299e1;
+}
+
+.direction-badge.current {
+    background: linear-gradient(135deg, #fed7d7 0%, #fcb8b8 100%);
+    color: #742a2a;
+    border: 2px solid #e53e3e;
+    position: relative;
+}
+
+.direction-badge.current-match {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border: 2px solid #28a745;
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 15px rgba(40, 167, 69, 0.3); }
+    50% { box-shadow: 0 0 25px rgba(40, 167, 69, 0.6); }
+    100% { box-shadow: 0 0 15px rgba(40, 167, 69, 0.3); }
+}
+
+.current-analysis {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.current-entrance {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.compatibility-text {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.compatibility-text.excellent {
+    background: #d4edda;
+    color: #155724;
+}
+
+.compatibility-text.good {
+    background: #cce7ff;
+    color: #004085;
+}
+
+.compatibility-text.needs-remedy {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.recommendation-summary {
+    margin-top: 20px;
+}
+
+.advice-box {
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.advice-box.excellent {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.advice-box.good {
+    background: #cce7ff;
+    border-color: #007bff;
+    color: #004085;
+}
+
+.advice-box.needs-attention {
+    background: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+}
+
+/* Multi-Dimensional Analysis Items */
+.analysis-item {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 16px;
+    border-left: 5px solid #e2e8f0;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+.analysis-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.analysis-item.excellent {
+    border-left-color: #48bb78;
+    background: linear-gradient(135deg, #f0fff4 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.analysis-item.good {
+    border-left-color: #38b2ac;
+    background: linear-gradient(135deg, #e6fffa 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.analysis-item.average {
+    border-left-color: #ed8936;
+    background: linear-gradient(135deg, #fffbeb 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.analysis-item.poor {
+    border-left-color: #e53e3e;
+    background: linear-gradient(135deg, #fed7d7 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.analysis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.room-name {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.2rem;
+}
+
+.overall-score {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.current-direction {
+    color: #4a5568;
+    font-size: 14px;
+    margin-bottom: 15px;
+    padding: 8px 12px;
+    background: rgba(74, 85, 104, 0.1);
+    border-radius: 8px;
+}
+
+.analysis-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.score-component {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.score-component:hover {
+    transform: scale(1.05);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.score-component.vastu {
+    border-top: 3px solid #667eea;
+}
+
+.score-component.numerology {
+    border-top: 3px solid #ed8936;
+}
+
+.score-component.astrology {
+    border-top: 3px solid #9f7aea;
+}
+
+.component-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #4a5568;
+    font-weight: 600;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.component-label .icon {
+    font-size: 14px;
+}
+
+.component-score {
+    font-weight: bold;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.component-score.excellent { color: #48bb78; }
+.component-score.good { color: #38b2ac; }
+.component-score.average { color: #ed8936; }
+.component-score.poor { color: #e53e3e; }
+
+.compatibility-indicator {
+    font-size: 16px;
+}
+
+.room-recommendations {
+    background: rgba(247, 250, 252, 0.6);
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.best-directions-label {
+    font-size: 12px;
+    color: #4a5568;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.best-directions-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.mini-direction-badge {
+    background: #e2e8f0;
+    color: #4a5568;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.mini-direction-badge.current {
+    background: #667eea;
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.no-data {
+    color: #a0aec0;
+    font-style: italic;
+    font-size: 12px;
+}
+
+/* Astrology Section Styling */
+.astrology-section {
+    margin-top: 35px;
+    text-align: center;
+}
+
+.astrology-container {
+    margin-top: 25px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.astrology-header {
+    background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+    color: white;
+    padding: 25px 30px;
+    margin: 0;
+}
+
+.astrology-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.astrology-content {
+    padding: 30px;
+    text-align: left;
+}
+
+.astrology-section.profile,
+.astrology-section.directions,
+.astrology-section.compatibility {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    border-left: 5px solid transparent;
+}
+
+.astrology-section.profile {
+    border-left-color: #9f7aea;
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);
+}
+
+.astrology-section.directions {
+    border-left-color: #4299e1;
+    background: linear-gradient(135deg, #ebf8ff 0%, #ffffff 100%);
+}
+
+.astrology-section.compatibility {
+    border-left-color: #48bb78;
+    background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+}
+
+.astrology-section-title {
+    color: #2d3748;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.profile-item {
+    background: rgba(247, 250, 252, 0.8);
+    padding: 12px 16px;
+    border-radius: 10px;
+    border-left: 3px solid #9f7aea;
+}
+
+.directions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.direction-group h5 {
+    color: #2d3748;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+}
+
+.direction-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.compatibility-score {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.room-astrology-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.room-astrology-item {
+    background: rgba(247, 250, 252, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #e2e8f0;
+}
+
+.room-astrology-item.compatible {
+    border-left-color: #48bb78;
+    background: linear-gradient(135deg, #f0fff4 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+.room-astrology-item.incompatible {
+    border-left-color: #ed8936;
+    background: linear-gradient(135deg, #fffbeb 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+.room-reason {
+    font-size: 12px;
+    color: #718096;
+    margin-top: 5px;
+}
+
+/* AI Remedies Styling */
+.ai-section {
+    margin-top: 35px;
+    text-align: center;
+}
+
+.remedy-container {
+    margin-top: 25px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.remedy-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px 30px;
+    margin: 0;
+}
+
+.remedy-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.remedy-content {
+    padding: 30px;
+    line-height: 1.7;
+    color: #2d3748;
+    font-size: 15px;
+    text-align: left;
+}
+
+/* Remedy Section Styling */
+.remedy-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    border-left: 5px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.remedy-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.remedy-section.immediate {
+    border-left-color: #f56565;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+}
+
+.remedy-section.progressive {
+    border-left-color: #ed8936;
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.remedy-section.astrological {
+    border-left-color: #9f7aea;
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);
+}
+
+.remedy-section.numerological {
+    border-left-color: #38b2ac;
+    background: linear-gradient(135deg, #e6fffa 0%, #ffffff 100%);
+}
+
+.remedy-section.spiritual {
+    border-left-color: #38b2ac;
+    background: linear-gradient(135deg, #e6fffa 0%, #ffffff 100%);
+}
+
+.remedy-section.general {
+    border-left-color: #667eea;
+    background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
+}
+
+.remedy-section-title {
+    color: #2d3748;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.remedy-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.remedy-list li {
+    position: relative;
+    padding: 15px 0;
+    padding-left: 35px;
+    border-bottom: 1px solid #f7fafc;
+    transition: all 0.2s ease;
+    line-height: 1.6;
+}
+
+.remedy-list li:last-child {
+    border-bottom: none;
+}
+
+.remedy-list li:hover {
+    background-color: rgba(102, 126, 234, 0.05);
+    border-radius: 8px;
+    margin: 0 -15px;
+    padding-left: 50px;
+}
+
+.remedy-list li::before {
+    position: absolute;
+    left: 0;
+    top: 15px;
+    font-size: 18px;
+    opacity: 0.8;
+}
+
+.remedy-section.immediate .remedy-list li::before {
+    content: "🚀";
+}
+
+.remedy-section.progressive .remedy-list li::before {
+    content: "📈";
+}
+
+.remedy-section.astrological .remedy-list li::before {
+    content: "⭐";
+}
+
+.remedy-section.numerological .remedy-list li::before {
+    content: "🔢";
+}
+
+.remedy-section.spiritual .remedy-list li::before {
+    content: "🕉️";
+}
+
+.remedy-section.general .remedy-list li::before {
+    content: "💡";
+}
+
+/* Loading and error states */
+.remedy-loading, .astrology-loading {
+    text-align: center;
+    padding: 50px;
+    color: #4a5568;
+}
+
+.remedy-loading .spinner, .astrology-loading .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+.remedy-loading p, .astrology-loading p {
+    font-size: 1.1rem;
+    color: #718096;
+    margin-top: 15px;
+}
+
+.remedy-error, .astrology-error {
+    background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 20%);
+    border: 1px solid #fc8181;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    color: #c53030;
+    margin: 20px;
+}
+
+.remedy-meta, .astrology-meta {
+    background: rgba(247, 250, 252, 0.8);
+    padding: 20px 30px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 13px;
+    color: #718096;
+    text-align: center;
+    backdrop-filter: blur(5px);
+}
+
+/* Loading spinner for button */
+.loading .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive Design for New Elements */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+    
+    .header h1 {
+        font-size: 2.2rem;
+    }
+    
+    .header p {
+        font-size: 1rem;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .score-display, .compatibility-score {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .score-circle {
+        width: 120px;
+        height: 120px;
+        font-size: 1.5rem;
+    }
+    
+    .recommendation-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .direction-badges {
+        justify-content: center;
+    }
+    
+    .analysis-breakdown {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .current-entrance {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .analysis-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .overall-score {
+        font-size: 1.2rem;
+    }
+    
+    .room-name {
+        font-size: 1.1rem;
+    }
+    
+    .room-astrology-grid, .profile-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .directions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .remedy-content, .astrology-content {
+        padding: 20px;
+        font-size: 14px;
+    }
+    
+    .remedy-section, .astrology-section {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .remedy-section-title, .astrology-section-title {
+        font-size: 1.1rem;
+    }
+    
+    .btn-ai, .btn-primary, .btn-astrology {
+        padding: 14px 28px;
+        font-size: 14px;
+    }
+}
+
+/* Enhanced Animation */
+.analysis-item {
+    animation: slideInUp 0.6s ease forwards;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.recommendation-card {
+    animation: fadeInScale 0.5s ease forwards;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Animation keyframes */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.remedy-section, .astrology-section {
+    animation: fadeIn 0.6s ease forwards;
+}
+
+.room-item, .room-astrology-item {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition: all 0.2s ease;
+}

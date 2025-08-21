@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Multi-Dimensional Vastu Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🏠 Enhanced Multi-Dimensional Vastu Calculator</h1>
+            <p>Comprehensive property analysis combining Vastu principles, numerological harmony, and personalized astrological insights for optimal living spaces</p>
+        </header>
+
+        <!-- Main Form -->
+        <div class="form-section">
+            <form id="vastuForm" class="vastu-form">
+                <!-- Buyer Details -->
+                <div class="card">
+                    <h3>👤 Personal Details for Multi-Dimensional Analysis</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="birthDate">Birth Date *</label>
+                            <input type="date" id="birthDate" name="birthDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="birthTime">Birth Time (Optional)</label>
+                            <input type="time" id="birthTime" name="birthTime" placeholder="HH:MM (if known)">
+                        </div>
+                        <div class="form-group">
+                            <label for="birthPlace">Birth Place *</label>
+                            <input type="text" id="birthPlace" name="birthPlace" required placeholder="City, State/Country">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Directions -->
+                <div class="card">
+                    <h3>🧭 Property Room Directions</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="entrance">Main Entrance *</label>
+                            <select id="entrance" name="entrance" required>
+                                <option value="">Select Direction</option>
+                                <option value="North">North</option>
+                                <option value="East">East</option>
+                                <option value="South">South</option>
+                                <option value="West">West</option>
+                                <option value="Northeast">Northeast</option>
+                                <option value="Northwest">Northwest</option>
+                                <option value="Southeast">Southeast</option>
+                                <option value="Southwest">Southwest</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="masterBedroom">Master Bedroom *</label>
+                            <select id="masterBedroom" name="masterBedroom" required>
+                                <option value="">Select Direction</option>
+                                <option value="North">North</option>
+                                <option value="East">East</option>
+                                <option value="South">South</option>
+                                <option value="West">West</option>
+                                <option value="Northeast">Northeast</option>
+                                <option value="Northwest">Northwest</option>
+                                <option value="Southeast">Southeast</option>
+                                <option value="Southwest">Southwest</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="kitchen">Kitchen *</label>
+                            <select id="kitchen" name="kitchen" required>
+                                <option value="">Select Direction</option>
+                                <option value="North">North</option>
+                                <option value="East">East</option>
+                                <option value="South">South</option>
+                                <option value="West">West</option>
+                                <option value="Northeast">Northeast</option>
+                                <option value="Northwest">Northwest</option>
+                                <option value="Southeast">Southeast</option>
+                                <option value="Southwest">Southwest</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bathroom">Bathroom/Toilet *</label>
+                            <select id="bathroom" name="bathroom" required>
+                                <option value="">Select Direction</option>
+                                <option value="North">North</option>
+                                <option value="East">East</option>
+                                <option value="South">South</option>
+                                <option value="West">West</option>
+                                <option value="Northeast">Northeast</option>
+                                <option value="Northwest">Northwest</option>
+                                <option value="Southeast">Southeast</option>
+                                <option value="Southwest">Southwest</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="poojaRoom">Pooja/Prayer Room *</label>
+                            <select id="poojaRoom" name="poojaRoom" required>
+                                <option value="">Select Direction</option>
+                                <option value="North">North</option>
+                                <option value="East">East</option>
+                                <option value="South">South</option>
+                                <option value="West">West</option>
+                                <option value="Northeast">Northeast</option>
+                                <option value="Northwest">Northwest</option>
+                                <option value="Southeast">Southeast</option>
+                                <option value="Southwest">Southwest</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="livingRoom">Living Room *</label>
+                            <select id="livingRoom" name="livingRoom" required>
+                                <option value="">Select Direction</option>
+                                <option value="North">North</option>
+                                <option value="East">East</option>
+                                <option value="South">South</option>
+                                <option value="West">West</option>
+                                <option value="Northeast">Northeast</option>
+                                <option value="Northwest">Northwest</option>
+                                <option value="Southeast">Southeast</option>
+                                <option value="Southwest">Southwest</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Details -->
+                <div class="card">
+                    <h3>🏗️ Property Details</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="plotShape">Plot Shape *</label>
+                            <select id="plotShape" name="plotShape" required>
+                                <option value="">Select Plot Shape</option>
+                                <option value="Square">Square</option>
+                                <option value="Rectangle">Rectangle</option>
+                                <option value="Sher Mukha">Sher Mukha (Lion-faced)</option>
+                                <option value="Gau Mukha">Gau Mukha (Cow-faced)</option>
+                                <option value="Triangular">Triangular</option>
+                                <option value="Circular">Circular</option>
+                                <option value="Irregular">Irregular</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="floorNumber">Floor Number *</label>
+                            <input type="number" id="floorNumber" name="floorNumber" required min="0" max="100" placeholder="Enter floor number (0 for ground)">
+                        </div>
+                        <div class="form-group">
+                            <label for="houseNumber">House/Flat Number *</label>
+                            <input type="number" id="houseNumber" name="houseNumber" required min="1" placeholder="Enter house/flat number">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculate Button -->
+                <div class="button-section">
+                    <button type="submit" class="btn-primary">🔮 Calculate Multi-Dimensional Score</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="results-section" style="display: none;">
+            <!-- Score Display -->
+            <div class="score-display">
+                <div class="score-circle">
+                    <div class="score-text">
+                        <span id="finalScore">0</span>
+                        <small>/100</small>
+                    </div>
+                </div>
+                <div class="score-interpretation">
+                    <h3 id="interpretation">Calculating...</h3>
+                    <p id="description">Please wait while we analyze your property with multiple dimensions...</p>
+                </div>
+            </div>
+
+            <!-- Multi-Dimensional Analysis -->
+            <div class="breakdown-section">
+                <h3>🎯 Comprehensive Multi-Dimensional Analysis</h3>
+                <p style="text-align: center; color: #718096; margin-bottom: 25px;">
+                    Detailed evaluation combining Vastu principles, numerology compatibility, and astrological alignment
+                </p>
+                <div id="roomBreakdown" class="room-grid"></div>
+            </div>
+
+            <!-- Astrology Analysis Section -->
+            <div class="astrology-section">
+                <button id="analyzeAstrology" class="btn-astrology">
+                    🔮 Analyze Astrological Compatibility
+                    <span class="loading" style="display: none;">
+                        <div class="spinner"></div>
+                    </span>
+                </button>
+                <div id="astrologyResults" class="astrology-container" style="display: none;">
+                    <!-- Astrology analysis results will be inserted here -->
+                </div>
+            </div>
+
+            <!-- AI Remedies Section -->
+            <div class="ai-section">
+                <button id="generateRemedies" class="btn-ai">
+                    🤖 Get Enhanced Multi-Dimensional Remedies
+                    <span class="loading" style="display: none;">
+                        <div class="spinner"></div>
+                    </span>
+                </button>
+                <div id="remedyResults" class="remedy-container" style="display: none;">
+                    <!-- AI-generated content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
