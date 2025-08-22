@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complete Vastu-Astrology-Numerology Calculator</title>
     <link rel="stylesheet" href="style.css">
-    <!-- jsPDF Library -->
+    <!-- Libraries for capturing page as PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -313,13 +314,16 @@
                 <div class="download-card">
                     <div class="download-content">
                         <h3>📄 Complete Analysis Report</h3>
-                        <p>Download your comprehensive Vastu, Numerology, and Astrology analysis with all remedies in PDF format</p>
-                        <button id="downloadReport" class="btn-download">
-                            📥 Download Complete Report
-                            <span class="download-loading" style="display: none;">
-                                <div class="spinner"></div>
-                            </span>
-                        </button>
+                        <p>Download your complete analysis report as a PDF</p>
+                        <div class="download-options">
+                            <button id="downloadReport" class="btn-download">
+                                📥 Download Report PDF
+                                <span class="download-loading" style="display: none;">
+                                    <div class="spinner"></div>
+                                </span>
+                            </button>
+                        </div>
+                        <p class="download-note">This will capture the entire report as a PDF document</p>
                     </div>
                 </div>
             </div>

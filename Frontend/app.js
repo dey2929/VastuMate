@@ -2,11 +2,11 @@ class ComprehensiveVastuCalculator {
     constructor() {
         this.apiBaseUrl = 'http://localhost:3001/api';
         this.analysisData = null;
-        // Store analysis results for PDF generation
+        // Store analysis results
         this.vastuAnalysis = null;
         this.numerologyAnalysis = null;
         this.astrologyAnalysis = null;
-        // Store remedies for PDF generation
+        // Store remedies
         this.generatedRemedies = {
             vastu: null,
             numerology: null,
@@ -38,9 +38,9 @@ class ComprehensiveVastuCalculator {
         document.getElementById('generateAstrologyRemedies')?.addEventListener('click', () => 
             this.generateRemedies('astrology'));
 
-        // PDF Download button
+        // PDF Download button - now captures the page
         document.getElementById('downloadReport')?.addEventListener('click', () => 
-            this.downloadPDFReport());
+            this.downloadPageAsPDF());
     }
 
     loadSampleData() {
@@ -156,7 +156,7 @@ class ComprehensiveVastuCalculator {
         this.displayResults(this.vastuAnalysis, this.numerologyAnalysis, this.astrologyAnalysis);
     }
 
-    // 1. VASTU ANALYSIS - Room directions + Plot shape only
+    // All existing analysis methods remain the same...
     analyzeVastu() {
         const { propertyDetails } = this.analysisData;
         
@@ -172,7 +172,6 @@ class ComprehensiveVastuCalculator {
         const avgRoomScore = Object.values(roomScores).reduce((a, b) => a + b, 0) / 6;
         const plotShapeScore = this.getPlotShapeScore(propertyDetails.plotShape);
         
-        // Vastu score: 80% rooms + 20% plot shape
         const vastuScore = Math.round((avgRoomScore * 0.8) + (plotShapeScore * 0.2));
 
         return {
@@ -184,7 +183,6 @@ class ComprehensiveVastuCalculator {
         };
     }
 
-    // 2. NUMEROLOGY ANALYSIS - House number compatibility
     analyzeNumerology() {
         const { personalDetails, propertyDetails } = this.analysisData;
         
@@ -204,7 +202,6 @@ class ComprehensiveVastuCalculator {
         };
     }
 
-    // 3. ASTROLOGY ANALYSIS - House direction vs personal directions
     analyzeAstrology() {
         const { personalDetails, propertyDetails } = this.analysisData;
         
@@ -225,7 +222,7 @@ class ComprehensiveVastuCalculator {
         };
     }
 
-    // VASTU HELPER FUNCTIONS (keeping all existing methods)
+    // All existing helper methods remain the same...
     getRoomScore(room, direction) {
         const scores = {
             'Entrance': {
@@ -264,7 +261,6 @@ class ComprehensiveVastuCalculator {
         return scores[shape] || 50;
     }
 
-    // NUMEROLOGY HELPER FUNCTIONS
     calculateBirthNumber(birthDate) {
         const date = new Date(birthDate);
         const dateStr = `${date.getDate()}${date.getMonth() + 1}${date.getFullYear()}`;
@@ -301,7 +297,6 @@ class ComprehensiveVastuCalculator {
         };
     }
 
-    // ASTROLOGY HELPER FUNCTIONS
     calculateAstrologyProfile(personalDetails) {
         const birthDate = new Date(personalDetails.birthDate);
         const dayOfWeek = birthDate.getDay();
@@ -337,7 +332,7 @@ class ComprehensiveVastuCalculator {
         const nakshatras = ['Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra', 
                            'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni'];
         const index = Math.floor((dayOfYear * 27) / 365) % 27;
-        return nakshatras[index % 11]; // Simplified for demo
+        return nakshatras[index % 11];
     }
 
     getDayOfYear(date) {
@@ -375,24 +370,17 @@ class ComprehensiveVastuCalculator {
         return { level: 'Poor', desc: 'Significant issues, urgent remedies needed' };
     }
 
-    // Helper function to get score color class
     getScoreColorClass(score) {
         return score > 80 ? 'score-good' : 'score-poor';
     }
 
-    // DISPLAY FUNCTIONS
+    // All existing display and remedy methods remain the same...
     displayResults(vastuAnalysis, numerologyAnalysis, astrologyAnalysis) {
-        // Show results section
         document.getElementById('results').style.display = 'block';
         document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
 
-        // Display Vastu Analysis
         this.displayVastuResults(vastuAnalysis);
-        
-        // Display Numerology Analysis
         this.displayNumerologyResults(numerologyAnalysis);
-        
-        // Display Astrology Analysis
         this.displayAstrologyResults(astrologyAnalysis);
     }
 
@@ -404,7 +392,6 @@ class ComprehensiveVastuCalculator {
         const roomBreakdown = document.getElementById('vastuRoomBreakdown');
         roomBreakdown.innerHTML = '';
         
-        // Add plot shape score first
         const plotElement = document.createElement('div');
         plotElement.className = `room-item ${this.getScoreClass(analysis.plotShapeScore)}`;
         plotElement.innerHTML = `
@@ -413,7 +400,6 @@ class ComprehensiveVastuCalculator {
         `;
         roomBreakdown.appendChild(plotElement);
         
-        // Add room scores
         Object.entries(analysis.roomScores).forEach(([room, score]) => {
             const roomElement = document.createElement('div');
             roomElement.className = `room-item ${this.getScoreClass(score)}`;
@@ -424,7 +410,6 @@ class ComprehensiveVastuCalculator {
             roomBreakdown.appendChild(roomElement);
         });
 
-        // Show/hide remedy button based on score
         const remedySection = document.querySelector('.vastu-section .remedy-section');
         if (analysis.score < 80) {
             remedySection.style.display = 'block';
@@ -449,16 +434,13 @@ class ComprehensiveVastuCalculator {
         document.getElementById('moonSign').textContent = analysis.profile.moonSign;
         document.getElementById('birthStar').textContent = analysis.profile.birthStar;
 
-        // Display favorable directions
         const favorableDiv = document.getElementById('favorableDirections');
         favorableDiv.innerHTML = analysis.profile.favorableDirections
             .map(dir => `<span class="direction-badge favorable">${dir}</span>`).join('');
 
-        // Display house direction
         const houseDir = document.getElementById('currentHouseDirection');
         houseDir.innerHTML = `<span class="direction-badge current">${analysis.houseDirection}</span>`;
 
-        // Display compatibility
         const compatibility = document.getElementById('directionCompatibility');
         compatibility.textContent = analysis.compatibility;
         compatibility.className = analysis.score >= 70 ? 'compatible' : 'incompatible';
@@ -471,7 +453,7 @@ class ComprehensiveVastuCalculator {
         return 'poor';
     }
 
-    // REMEDY GENERATION
+    // All existing remedy methods remain the same...
     async generateRemedies(analysisType) {
         const button = document.getElementById(`generate${analysisType.charAt(0).toUpperCase() + analysisType.slice(1)}Remedies`);
         const resultsDiv = document.getElementById(`${analysisType}RemedyResults`);
@@ -481,7 +463,6 @@ class ComprehensiveVastuCalculator {
             button.disabled = true;
             loading.style.display = 'inline';
             
-            // Show loading
             resultsDiv.innerHTML = `
                 <div class="remedy-loading">
                     <div class="spinner"></div>
@@ -506,7 +487,6 @@ class ComprehensiveVastuCalculator {
 
             const result = await response.json();
             
-            // Store remedies for PDF generation
             this.generatedRemedies[analysisType] = result.remedies;
             
             this.displayRemedies(analysisType, result.remedies);
@@ -525,14 +505,12 @@ class ComprehensiveVastuCalculator {
         
         let content = remedies.content || 'No content received';
         
-        // Clean up escaped characters
         content = content
             .replace(/\\n/g, '\n')
             .replace(/\\\*/g, '')
             .replace(/\*\*/g, '')
             .replace(/\\"/g, '"');
 
-        // Parse numbered remedies
         const remedyList = this.parseRemedies(content);
 
         const typeLabels = {
@@ -563,24 +541,22 @@ class ComprehensiveVastuCalculator {
                 </div>
             </div>
             <div class="remedy-meta">
-                <p>Generated on: ${new Date().toLocaleString()}</p>
+                <p>Generated on: ${new Date().toLocaleString()}, Model: GPT-4o</p>
             </div>
         `;
     }
 
     parseRemedies(content) {
-        // Split by lines and filter for numbered remedies
         const lines = content.split('\n').filter(line => line.trim());
         const remedies = [];
         
         for (const line of lines) {
             const trimmedLine = line.trim();
-            // Look for numbered items (1., 2., etc.) or bullet points
             if (trimmedLine.match(/^\d+\./) || trimmedLine.match(/^[-•*]/) || 
                 (trimmedLine.length > 20 && !trimmedLine.includes(':'))) {
                 let remedy = trimmedLine
-                    .replace(/^\d+\.\s*/, '') // Remove numbering
-                    .replace(/^[-•*]\s*/, '') // Remove bullet points
+                    .replace(/^\d+\.\s*/, '')
+                    .replace(/^[-•*]\s*/, '')
                     .trim();
                 
                 if (remedy.length > 10) {
@@ -589,13 +565,12 @@ class ComprehensiveVastuCalculator {
             }
         }
         
-        // If no numbered remedies found, split by sentences
         if (remedies.length === 0) {
             const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20);
-            return sentences.slice(0, 7); // Max 7 remedies
+            return sentences.slice(0, 7);
         }
         
-        return remedies.slice(0, 7); // Max 7 remedies
+        return remedies.slice(0, 7);
     }
 
     showRemedyError(analysisType, message) {
@@ -608,8 +583,8 @@ class ComprehensiveVastuCalculator {
         `;
     }
 
-    // PDF GENERATION FUNCTION
-    async downloadPDFReport() {
+    // NEW METHOD: CAPTURE PAGE AS PDF
+    async downloadPageAsPDF() {
         const button = document.getElementById('downloadReport');
         const loading = button.querySelector('.download-loading');
 
@@ -617,193 +592,85 @@ class ComprehensiveVastuCalculator {
             button.disabled = true;
             loading.style.display = 'inline';
 
-            // Check if jsPDF is available
-            if (typeof window.jsPDF === 'undefined') {
-                throw new Error('PDF library not loaded');
+            // Check if analysis is complete
+            if (!this.analysisData || !this.vastuAnalysis || !this.numerologyAnalysis || !this.astrologyAnalysis) {
+                throw new Error('Please complete the property analysis first');
             }
 
-            const { jsPDF } = window.jsPDF;
-            const doc = new jsPDF();
+            // Check if required libraries are loaded
+            if (typeof html2canvas === 'undefined' || typeof window.jsPDF === 'undefined') {
+                throw new Error('PDF libraries not loaded. Please refresh the page and try again.');
+            }
 
-            // Set initial position
-            let yPosition = 20;
-            const pageHeight = doc.internal.pageSize.height;
-            const margin = 20;
+            // Temporarily hide the download section to avoid capturing it
+            const downloadSection = document.querySelector('.download-section');
+            const originalDisplay = downloadSection.style.display;
+            downloadSection.style.display = 'none';
 
-            // Helper function to check if we need a new page
-            const checkNewPage = (requiredSpace = 20) => {
-                if (yPosition + requiredSpace > pageHeight - margin) {
-                    doc.addPage();
-                    yPosition = 20;
+            // Scroll to top to ensure full capture
+            window.scrollTo(0, 0);
+
+            // Wait a moment for scroll to complete
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Capture the page
+            const canvas = await html2canvas(document.body, {
+                height: window.innerHeight,
+                width: window.innerWidth,
+                useCORS: true,
+                scale: 1,
+                scrollX: 0,
+                scrollY: 0,
+                allowTaint: true,
+                backgroundColor: '#f3f4f6',
+                ignoreElements: (element) => {
+                    // Ignore loading spinners and other temporary elements
+                    return element.classList.contains('spinner') || 
+                           element.classList.contains('loading') ||
+                           element.style.display === 'none';
                 }
-            };
-
-            // Title
-            doc.setFontSize(20);
-            doc.setFont(undefined, 'bold');
-            doc.text('Complete Vastu-Astrology-Numerology Report', margin, yPosition);
-            yPosition += 15;
-
-            // Personal Details
-            doc.setFontSize(14);
-            doc.text('Personal Information', margin, yPosition);
-            yPosition += 10;
-            
-            doc.setFontSize(11);
-            doc.setFont(undefined, 'normal');
-            doc.text(`Name: ${this.analysisData.personalDetails.name}`, margin, yPosition);
-            yPosition += 7;
-            doc.text(`Birth Date: ${this.analysisData.personalDetails.birthDate}`, margin, yPosition);
-            yPosition += 7;
-            doc.text(`Birth Place: ${this.analysisData.personalDetails.birthPlace}`, margin, yPosition);
-            yPosition += 7;
-            doc.text(`House Number: ${this.analysisData.propertyDetails.houseNumber}`, margin, yPosition);
-            yPosition += 7;
-            doc.text(`House Direction: ${this.analysisData.propertyDetails.houseDirection}`, margin, yPosition);
-            yPosition += 15;
-
-            checkNewPage(30);
-
-            // Vastu Analysis
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('🏠 Vastu Analysis', margin, yPosition);
-            yPosition += 10;
-
-            doc.setFontSize(12);
-            doc.text(`Score: ${this.vastuAnalysis.score}/100 - ${this.vastuAnalysis.interpretation.level}`, margin, yPosition);
-            yPosition += 7;
-            doc.setFontSize(10);
-            doc.text(`${this.vastuAnalysis.interpretation.desc}`, margin, yPosition);
-            yPosition += 10;
-
-            // Room Scores
-            doc.setFontSize(11);
-            doc.setFont(undefined, 'bold');
-            doc.text('Room Scores:', margin, yPosition);
-            yPosition += 7;
-            doc.setFont(undefined, 'normal');
-            
-            doc.text(`Plot Shape (${this.vastuAnalysis.plotShape}): ${this.vastuAnalysis.plotShapeScore}/100`, margin, yPosition);
-            yPosition += 6;
-            
-            Object.entries(this.vastuAnalysis.roomScores).forEach(([room, score]) => {
-                checkNewPage(8);
-                doc.text(`${room}: ${score}/100`, margin, yPosition);
-                yPosition += 6;
             });
-            yPosition += 10;
 
-            // Vastu Remedies
-            if (this.generatedRemedies.vastu) {
-                checkNewPage(20);
-                doc.setFont(undefined, 'bold');
-                doc.text('Vastu Remedies:', margin, yPosition);
-                yPosition += 7;
-                doc.setFont(undefined, 'normal');
-                
-                const vastuRemedyList = this.parseRemedies(this.generatedRemedies.vastu.content);
-                vastuRemedyList.forEach((remedy, index) => {
-                    checkNewPage(12);
-                    const remedyText = `${index + 1}. ${remedy}`;
-                    const lines = doc.splitTextToSize(remedyText, 170);
-                    doc.text(lines, margin, yPosition);
-                    yPosition += lines.length * 5 + 3;
-                });
+            // Restore download section
+            downloadSection.style.display = originalDisplay;
+
+            // Create PDF
+            const { jsPDF } = window.jsPDF;
+            const imgData = canvas.toDataURL('image/png');
+            
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const imgWidth = 210; // A4 width in mm
+            const pageHeight = 295; // A4 height in mm
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            // Add first page
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            // Add additional pages if content is longer than one page
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
             }
-            yPosition += 10;
-
-            checkNewPage(30);
-
-            // Numerology Analysis
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('🔢 Numerology Analysis', margin, yPosition);
-            yPosition += 10;
-
-            doc.setFontSize(12);
-            doc.text(`Score: ${this.numerologyAnalysis.score}/100 - ${this.numerologyAnalysis.compatibility}`, margin, yPosition);
-            yPosition += 7;
-            doc.setFontSize(10);
-            doc.text(`Birth Number: ${this.numerologyAnalysis.birthNumber}`, margin, yPosition);
-            yPosition += 6;
-            doc.text(`House Numerology: ${this.numerologyAnalysis.houseNumerology}`, margin, yPosition);
-            yPosition += 6;
-            doc.text(`${this.numerologyAnalysis.interpretation}`, margin, yPosition);
-            yPosition += 10;
-
-            // Numerology Remedies
-            if (this.generatedRemedies.numerology) {
-                checkNewPage(20);
-                doc.setFont(undefined, 'bold');
-                doc.text('Numerology Remedies:', margin, yPosition);
-                yPosition += 7;
-                doc.setFont(undefined, 'normal');
-                
-                const numerologyRemedyList = this.parseRemedies(this.generatedRemedies.numerology.content);
-                numerologyRemedyList.forEach((remedy, index) => {
-                    checkNewPage(12);
-                    const remedyText = `${index + 1}. ${remedy}`;
-                    const lines = doc.splitTextToSize(remedyText, 170);
-                    doc.text(lines, margin, yPosition);
-                    yPosition += lines.length * 5 + 3;
-                });
-            }
-            yPosition += 10;
-
-            checkNewPage(30);
-
-            // Astrology Analysis
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('⭐ Astrology Analysis', margin, yPosition);
-            yPosition += 10;
-
-            doc.setFontSize(12);
-            doc.text(`Score: ${this.astrologyAnalysis.score}/100 - ${this.astrologyAnalysis.compatibility}`, margin, yPosition);
-            yPosition += 7;
-            doc.setFontSize(10);
-            doc.text(`Planetary Ruler: ${this.astrologyAnalysis.profile.planetaryRuler}`, margin, yPosition);
-            yPosition += 6;
-            doc.text(`Moon Sign: ${this.astrologyAnalysis.profile.moonSign}`, margin, yPosition);
-            yPosition += 6;
-            doc.text(`Birth Star: ${this.astrologyAnalysis.profile.birthStar}`, margin, yPosition);
-            yPosition += 6;
-            doc.text(`Favorable Directions: ${this.astrologyAnalysis.profile.favorableDirections.join(', ')}`, margin, yPosition);
-            yPosition += 6;
-            doc.text(`${this.astrologyAnalysis.interpretation}`, margin, yPosition);
-            yPosition += 10;
-
-            // Astrology Remedies
-            if (this.generatedRemedies.astrology) {
-                checkNewPage(20);
-                doc.setFont(undefined, 'bold');
-                doc.text('Astrological Remedies:', margin, yPosition);
-                yPosition += 7;
-                doc.setFont(undefined, 'normal');
-                
-                const astrologyRemedyList = this.parseRemedies(this.generatedRemedies.astrology.content);
-                astrologyRemedyList.forEach((remedy, index) => {
-                    checkNewPage(12);
-                    const remedyText = `${index + 1}. ${remedy}`;
-                    const lines = doc.splitTextToSize(remedyText, 170);
-                    doc.text(lines, margin, yPosition);
-                    yPosition += lines.length * 5 + 3;
-                });
-            }
-
-            // Footer
-            checkNewPage(15);
-            doc.setFontSize(9);
-            doc.text(`Report generated on: ${new Date().toLocaleString()}`, margin, yPosition);
 
             // Save the PDF
-            const fileName = `Complete_Analysis_Report_${this.analysisData.personalDetails.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-            doc.save(fileName);
+            const fileName = `Vastu_Analysis_Report_${this.analysisData.personalDetails.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            pdf.save(fileName);
+
+            alert('PDF report downloaded successfully!');
 
         } catch (error) {
-            console.error('Failed to generate PDF:', error);
-            alert('Failed to generate PDF report. Please try again.');
+            console.error('Failed to capture page as PDF:', error);
+            alert(`Failed to generate PDF: ${error.message}`);
         } finally {
             button.disabled = false;
             loading.style.display = 'none';
