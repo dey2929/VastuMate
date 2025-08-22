@@ -1,8 +1,17 @@
-class EnhancedVastuCalculator {
+class ComprehensiveVastuCalculator {
     constructor() {
         this.apiBaseUrl = 'http://localhost:3001/api';
-        this.lastCalculation = null;
+        this.analysisData = null;
+        // Store analysis results for PDF generation
+        this.vastuAnalysis = null;
+        this.numerologyAnalysis = null;
         this.astrologyAnalysis = null;
+        // Store remedies for PDF generation
+        this.generatedRemedies = {
+            vastu: null,
+            numerology: null,
+            astrology: null
+        };
         this.init();
     }
 
@@ -15,26 +24,28 @@ class EnhancedVastuCalculator {
 
     setupEventListeners() {
         const form = document.getElementById('vastuForm');
-        const remedyButton = document.getElementById('generateRemedies');
-        const astrologyButton = document.getElementById('analyzeAstrology');
-
+        
+        // Form submission
         if (form) {
             form.addEventListener('submit', (e) => this.handleFormSubmit(e));
         }
 
-        if (remedyButton) {
-            remedyButton.addEventListener('click', () => this.generateAIRemedies());
-        }
+        // Remedy buttons
+        document.getElementById('generateVastuRemedies')?.addEventListener('click', () => 
+            this.generateRemedies('vastu'));
+        document.getElementById('generateNumerologyRemedies')?.addEventListener('click', () => 
+            this.generateRemedies('numerology'));
+        document.getElementById('generateAstrologyRemedies')?.addEventListener('click', () => 
+            this.generateRemedies('astrology'));
 
-        if (astrologyButton) {
-            astrologyButton.addEventListener('click', () => this.analyzeAstrology());
-        }
+        // PDF Download button
+        document.getElementById('downloadReport')?.addEventListener('click', () => 
+            this.downloadPDFReport());
     }
 
     loadSampleData() {
         const sampleData = {
             name: 'Aman Kumar',
-            
             birthDate: '2000-08-18',
             birthTime: '14:30',
             birthPlace: 'Delhi, India',
@@ -45,8 +56,8 @@ class EnhancedVastuCalculator {
             poojaRoom: 'North',
             livingRoom: 'North',
             plotShape: 'Sher Mukha',
-            floorNumber: 22,
-            houseNumber: 2210
+            houseNumber: 2210,
+            houseDirection: 'North'
         };
 
         Object.entries(sampleData).forEach(([key, value]) => {
@@ -67,19 +78,43 @@ class EnhancedVastuCalculator {
             return;
         }
 
-        const results = this.calculateVastuScore(data);
-        this.lastCalculation = results;
+        // Reset all remedies and enable buttons for new analysis
+        this.resetAllRemedies();
+
+        // Perform all three analyses
+        this.performComprehensiveAnalysis(data);
+    }
+
+    // Reset all remedy sections and enable buttons
+    resetAllRemedies() {
+        const remedyTypes = ['vastu', 'numerology', 'astrology'];
         
-        this.displayResults(results);
-        
-        // Automatically analyze astrology if birth details are available
-        if (data.birthDate) {
-            this.analyzeAstrology();
-        }
+        remedyTypes.forEach(type => {
+            // Clear remedy results
+            const resultsDiv = document.getElementById(`${type}RemedyResults`);
+            if (resultsDiv) {
+                resultsDiv.style.display = 'none';
+                resultsDiv.innerHTML = '';
+            }
+            
+            // Re-enable remedy buttons
+            const button = document.getElementById(`generate${type.charAt(0).toUpperCase() + type.slice(1)}Remedies`);
+            if (button) {
+                button.disabled = false;
+                const loading = button.querySelector('.loading');
+                if (loading) {
+                    loading.style.display = 'none';
+                }
+            }
+
+            // Clear stored remedies
+            this.generatedRemedies[type] = null;
+        });
     }
 
     validateForm(data) {
-    const required = ['name', 'birthDate', 'birthPlace', 'entrance', 'masterBedroom', 'kitchen', 'bathroom', 'poojaRoom', 'livingRoom', 'plotShape', 'floorNumber', 'houseNumber'];
+        const required = ['name', 'birthDate', 'birthPlace', 'entrance', 'masterBedroom', 'kitchen', 
+                         'bathroom', 'poojaRoom', 'livingRoom', 'plotShape', 'houseNumber', 'houseDirection'];
         
         for (const field of required) {
             if (!data[field] || data[field].trim() === '') {
@@ -90,536 +125,107 @@ class EnhancedVastuCalculator {
         return true;
     }
 
-    calculateVastuScore(data) {
-        const roomScores = {
-            'Entrance': this.getRoomScore('Entrance', data.entrance),
-            'Master Bedroom': this.getRoomScore('Master Bedroom', data.masterBedroom),
-            'Kitchen': this.getRoomScore('Kitchen', data.kitchen),
-            'Bathroom': this.getRoomScore('Bathroom', data.bathroom),
-            'Pooja Room': this.getRoomScore('Pooja Room', data.poojaRoom),
-            'Living Room': this.getRoomScore('Living Room', data.livingRoom)
+    performComprehensiveAnalysis(formData) {
+        // Store analysis data
+        this.analysisData = {
+            personalDetails: {
+                name: formData.name,
+                birthDate: formData.birthDate,
+                birthTime: formData.birthTime,
+                birthPlace: formData.birthPlace
+            },
+            propertyDetails: {
+                entrance: formData.entrance,
+                masterBedroom: formData.masterBedroom,
+                kitchen: formData.kitchen,
+                bathroom: formData.bathroom,
+                poojaRoom: formData.poojaRoom,
+                livingRoom: formData.livingRoom,
+                plotShape: formData.plotShape,
+                houseNumber: parseInt(formData.houseNumber),
+                houseDirection: formData.houseDirection
+            }
         };
 
-        const avgRoomScore = Object.values(roomScores).reduce((a, b) => a + b, 0) / Object.keys(roomScores).length;
-        const plotShapeScore = this.getPlotShapeScore(data.plotShape);
-        const floorScore = this.getFloorScore(parseInt(data.floorNumber));
-        const numerologyScore = this.getNumerologyScore(data.birthDate, data.houseNumber);
+        // Perform separate analyses
+        this.vastuAnalysis = this.analyzeVastu();
+        this.numerologyAnalysis = this.analyzeNumerology();
+        this.astrologyAnalysis = this.analyzeAstrology();
 
-        // Calculate individual numerology scores for each room direction
-        const roomNumerologyScores = this.calculateRoomNumerologyScores(data, roomScores);
+        // Display results
+        this.displayResults(this.vastuAnalysis, this.numerologyAnalysis, this.astrologyAnalysis);
+    }
 
-        // Base Vastu score (will be enhanced with astrology later)
-        const baseVastuScore = Math.round(
-            avgRoomScore * 0.35 +
-            plotShapeScore * 0.15 +
-            numerologyScore * 0.15 +
-            floorScore * 0.10 +
-            50 * 0.25  // Reserve 25% for astrology integration
+    // 1. VASTU ANALYSIS - Room directions + Plot shape only
+    analyzeVastu() {
+        const { propertyDetails } = this.analysisData;
+        
+        const roomScores = {
+            'Entrance': this.getRoomScore('Entrance', propertyDetails.entrance),
+            'Master Bedroom': this.getRoomScore('Master Bedroom', propertyDetails.masterBedroom),
+            'Kitchen': this.getRoomScore('Kitchen', propertyDetails.kitchen),
+            'Bathroom': this.getRoomScore('Bathroom', propertyDetails.bathroom),
+            'Pooja Room': this.getRoomScore('Pooja Room', propertyDetails.poojaRoom),
+            'Living Room': this.getRoomScore('Living Room', propertyDetails.livingRoom)
+        };
+
+        const avgRoomScore = Object.values(roomScores).reduce((a, b) => a + b, 0) / 6;
+        const plotShapeScore = this.getPlotShapeScore(propertyDetails.plotShape);
+        
+        // Vastu score: 80% rooms + 20% plot shape
+        const vastuScore = Math.round((avgRoomScore * 0.8) + (plotShapeScore * 0.2));
+
+        return {
+            score: vastuScore,
+            roomScores,
+            plotShapeScore,
+            plotShape: propertyDetails.plotShape,
+            interpretation: this.getScoreInterpretation(vastuScore)
+        };
+    }
+
+    // 2. NUMEROLOGY ANALYSIS - House number compatibility
+    analyzeNumerology() {
+        const { personalDetails, propertyDetails } = this.analysisData;
+        
+        const birthNumber = this.calculateBirthNumber(personalDetails.birthDate);
+        const houseNumber = propertyDetails.houseNumber;
+        const houseNumerology = this.calculateHouseNumerology(houseNumber);
+        
+        const compatibility = this.checkNumerologyCompatibility(birthNumber, houseNumerology);
+        
+        return {
+            score: compatibility.score,
+            birthNumber,
+            houseNumber,
+            houseNumerology,
+            compatibility: compatibility.status,
+            interpretation: compatibility.interpretation
+        };
+    }
+
+    // 3. ASTROLOGY ANALYSIS - House direction vs personal directions
+    analyzeAstrology() {
+        const { personalDetails, propertyDetails } = this.analysisData;
+        
+        const astrologyProfile = this.calculateAstrologyProfile(personalDetails);
+        const houseDirection = propertyDetails.houseDirection;
+        
+        const directionCompatibility = this.checkDirectionCompatibility(
+            astrologyProfile.favorableDirections,
+            houseDirection
         );
 
         return {
-            finalScore: baseVastuScore,
-            roomScores,
-            roomNumerologyScores,
-            plotShapeScore,
-            floorScore,
-            numerologyScore,
-            interpretation: this.getInterpretation(baseVastuScore),
-            buyerDetails: {
-                name: data.name,
-                birthDate: data.birthDate,
-                birthTime: data.birthTime,
-                birthPlace: data.birthPlace
-            },
-            propertyDetails: {
-                houseNumber: parseInt(data.houseNumber),
-                floorNumber: parseInt(data.floorNumber),
-                plotShape: data.plotShape,
-                entrance: data.entrance,
-                masterBedroom: data.masterBedroom,
-                kitchen: data.kitchen,
-                bathroom: data.bathroom,
-                poojaRoom: data.poojaRoom,
-                livingRoom: data.livingRoom
-            }
+            score: directionCompatibility.score,
+            profile: astrologyProfile,
+            houseDirection,
+            compatibility: directionCompatibility.status,
+            interpretation: directionCompatibility.interpretation
         };
     }
 
-    calculateRoomNumerologyScores(data, roomScores) {
-        const birthNumber = this.calculateBirthNumber(data.birthDate);
-        const houseNumber = this.calculateHouseNumber(data.houseNumber);
-        
-        const roomNumerologyScores = {};
-        
-        Object.keys(roomScores).forEach(room => {
-            const direction = data[this.getRoomKey(room)];
-            const directionNumber = this.getDirectionNumber(direction);
-            
-            // Calculate compatibility between birth number and direction
-            const compatibility = this.calculateDirectionalNumerologyCompatibility(birthNumber, directionNumber, houseNumber);
-            roomNumerologyScores[room] = compatibility;
-        });
-        
-        return roomNumerologyScores;
-    }
-
-    getDirectionNumber(direction) {
-        const directionNumbers = {
-            'North': 1,
-            'Northeast': 2,
-            'East': 3,
-            'Southeast': 4,
-            'South': 9,
-            'Southwest': 8,
-            'West': 7,
-            'Northwest': 6
-        };
-        return directionNumbers[direction] || 5;
-    }
-
-    calculateDirectionalNumerologyCompatibility(birthNum, directionNum, houseNum) {
-        // Advanced numerology compatibility calculation
-        const primaryCompatibility = Math.abs(birthNum - directionNum) <= 2 ? 85 : 60;
-        const houseAdjustment = (birthNum + houseNum) % 9 === directionNum % 9 ? 15 : -10;
-        
-        return Math.max(20, Math.min(100, primaryCompatibility + houseAdjustment));
-    }
-
-    async analyzeAstrology() {
-        if (!this.lastCalculation) {
-            alert('Please calculate Vastu score first!');
-            return;
-        }
-
-        const astrologyButton = document.getElementById('analyzeAstrology');
-        const loading = astrologyButton.querySelector('.loading');
-
-        try {
-            astrologyButton.disabled = true;
-            loading.style.display = 'inline';
-            this.showAstrologyLoading();
-
-            const requestData = {
-                birthDetails: this.lastCalculation.buyerDetails,
-                propertyDirections: this.lastCalculation.propertyDetails
-            };
-
-            const response = await fetch(`${this.apiBaseUrl}/analyze-astrology`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestData)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Astrology API Error: ${response.status}`);
-            }
-
-            const result = await response.json();
-            this.astrologyAnalysis = result;
-            
-            // Update the Vastu score with astrology integration
-            this.updateScoreWithAstrology(result);
-            
-            // Update room breakdown with astrology data
-            this.updateRoomBreakdownWithAstrology(result);
-            
-            this.displayAstrologyResults(result);
-
-        } catch (error) {
-            console.error('Failed to analyze astrology:', error);
-            this.showAstrologyError(error.message);
-        } finally {
-            astrologyButton.disabled = false;
-            loading.style.display = 'none';
-        }
-    }
-
-    updateScoreWithAstrology(astrologyResult) {
-        if (!this.lastCalculation || !astrologyResult) return;
-
-        const astrologyScore = astrologyResult.directionalCompatibility.overallScore;
-        
-        // Recalculate final score with astrology integration (25% weight)
-        const roomScore = Object.values(this.lastCalculation.roomScores).reduce((a, b) => a + b, 0) / 6;
-        
-        const enhancedFinalScore = Math.round(
-            roomScore * 0.35 +
-            this.lastCalculation.plotShapeScore * 0.15 +
-            this.lastCalculation.numerologyScore * 0.15 +
-            this.lastCalculation.floorScore * 0.10 +
-            astrologyScore * 0.25  // Astrology integration
-        );
-
-        // Update the score display
-        this.lastCalculation.finalScore = enhancedFinalScore;
-        this.lastCalculation.astrologyScore = astrologyScore;
-        this.lastCalculation.interpretation = this.getInterpretation(enhancedFinalScore);
-
-        // Update UI
-        document.getElementById('finalScore').textContent = enhancedFinalScore;
-        document.getElementById('interpretation').textContent = this.lastCalculation.interpretation.level;
-        document.getElementById('description').textContent = this.lastCalculation.interpretation.desc;
-    }
-
-    updateRoomBreakdownWithAstrology(astrologyResult) {
-        // Re-render room breakdown with astrology data
-        this.displayMultiDimensionalAnalysis();
-    }
-
-    displayMultiDimensionalAnalysis() {
-        const roomBreakdown = document.getElementById('roomBreakdown');
-        if (!roomBreakdown || !this.lastCalculation) return;
-
-        roomBreakdown.innerHTML = '';
-
-        // Add directional recommendation section first
-        const recommendationSection = document.createElement('div');
-        recommendationSection.className = 'directional-recommendations';
-        recommendationSection.innerHTML = this.createDirectionalRecommendations();
-        roomBreakdown.appendChild(recommendationSection);
-
-        // Add room analysis
-        Object.entries(this.lastCalculation.roomScores).forEach(([room, vastuScore]) => {
-            const roomElement = document.createElement('div');
-            roomElement.className = `analysis-item ${this.getOverallRoomClass(room)}`;
-            
-            const currentDirection = this.lastCalculation.propertyDetails[this.getRoomKey(room)];
-            const numerologyScore = this.lastCalculation.roomNumerologyScores?.[room] || 0;
-            const astrologyScore = this.astrologyAnalysis?.directionalCompatibility?.roomAnalysis?.[this.getRoomKey(room)]?.score || 0;
-            const astrologyCompatible = this.astrologyAnalysis?.directionalCompatibility?.roomAnalysis?.[this.getRoomKey(room)]?.compatible || false;
-            
-            // Calculate overall room score
-            const overallScore = Math.round((vastuScore * 0.5) + (numerologyScore * 0.25) + (astrologyScore * 0.25));
-            
-            roomElement.innerHTML = `
-                <div class="analysis-header">
-                    <div class="room-name">${room}</div>
-                    <div class="overall-score">${overallScore}/100</div>
-                </div>
-                <div class="current-direction">
-                    <strong>Current Direction:</strong> ${currentDirection}
-                </div>
-                <div class="analysis-breakdown">
-                    <div class="score-component vastu">
-                        <div class="component-label">
-                            <span class="icon">🏠</span>
-                            <span>Vastu Score</span>
-                        </div>
-                        <div class="component-score ${this.getScoreClass(vastuScore)}">${vastuScore}/100</div>
-                    </div>
-                    <div class="score-component numerology">
-                        <div class="component-label">
-                            <span class="icon">🔢</span>
-                            <span>Numerology</span>
-                        </div>
-                        <div class="component-score ${this.getScoreClass(numerologyScore)}">${numerologyScore}/100</div>
-                    </div>
-                    <div class="score-component astrology">
-                        <div class="component-label">
-                            <span class="icon">⭐</span>
-                            <span>Astrology</span>
-                        </div>
-                        <div class="component-score ${this.getScoreClass(astrologyScore)}">
-                            ${astrologyScore}/100
-                            <span class="compatibility-indicator">${astrologyCompatible ? '✅' : '⚠️'}</span>
-                        </div>
-                    </div>
-                </div>
-                ${this.getBestDirectionsForRoom(room)}
-            `;
-            roomBreakdown.appendChild(roomElement);
-        });
-    }
-
-    createDirectionalRecommendations() {
-        if (!this.astrologyAnalysis) {
-            return `
-                <div class="recommendation-card">
-                    <h4>🧭 Directional Analysis</h4>
-                    <p>Complete astrology analysis to see personalized directional recommendations.</p>
-                </div>
-            `;
-        }
-
-        const { astrologyProfile } = this.astrologyAnalysis;
-        const currentEntrance = this.lastCalculation.propertyDetails.entrance;
-        
-        return `
-            <div class="recommendation-card">
-                <h4>🧭 Your Personalized Directional Profile</h4>
-                <div class="recommendation-grid">
-                    <div class="recommendation-section best-directions">
-                        <h5>🌟 Best Directions for You</h5>
-                        <div class="direction-badges">
-                            ${astrologyProfile.favorableDirections?.map(dir => 
-                                `<span class="direction-badge best ${dir === currentEntrance ? 'current-match' : ''}">${dir}</span>`
-                            ).join('') || '<span class="no-data">Not calculated</span>'}
-                        </div>
-                    </div>
-                    <div class="recommendation-section lucky-directions">
-                        <h5>🍀 Lucky for Residence</h5>
-                        <div class="direction-badges">
-                            ${astrologyProfile.luckyDirections?.map(dir => 
-                                `<span class="direction-badge lucky ${dir === currentEntrance ? 'current-match' : ''}">${dir}</span>`
-                            ).join('') || '<span class="no-data">Not calculated</span>'}
-                        </div>
-                    </div>
-                    <div class="recommendation-section current-property">
-                        <h5>🏠 Your Current Property</h5>
-                        <div class="current-analysis">
-                            <div class="current-entrance">
-                                <strong>Main Entrance:</strong> 
-                                <span class="direction-badge current">${currentEntrance}</span>
-                                ${this.getEntranceCompatibilityText(currentEntrance)}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="recommendation-summary">
-                    ${this.getOverallDirectionalAdvice(currentEntrance)}
-                </div>
-            </div>
-        `;
-    }
-
-    getEntranceCompatibilityText(currentEntrance) {
-        if (!this.astrologyAnalysis) return '';
-        
-        const { favorableDirections, luckyDirections } = this.astrologyAnalysis.astrologyProfile;
-        
-        if (favorableDirections?.includes(currentEntrance)) {
-            return '<span class="compatibility-text excellent">🎯 Perfect Match!</span>';
-        } else if (luckyDirections?.includes(currentEntrance)) {
-            return '<span class="compatibility-text good">✨ Lucky Direction!</span>';
-        } else {
-            return '<span class="compatibility-text needs-remedy">⚡ Needs Remedies</span>';
-        }
-    }
-
-    getOverallDirectionalAdvice(currentEntrance) {
-        if (!this.astrologyAnalysis) return '';
-        
-        const { favorableDirections, luckyDirections } = this.astrologyAnalysis.astrologyProfile;
-        
-        if (favorableDirections?.includes(currentEntrance)) {
-            return `
-                <div class="advice-box excellent">
-                    <strong>🎉 Excellent Alignment!</strong> Your main entrance faces ${currentEntrance}, which is one of your most favorable directions. This supports your natural energy flow and life goals.
-                </div>
-            `;
-        } else if (luckyDirections?.includes(currentEntrance)) {
-            return `
-                <div class="advice-box good">
-                    <strong>✨ Good Compatibility!</strong> Your main entrance faces ${currentEntrance}, which is considered lucky for your residence. This brings positive energy to your home.
-                </div>
-            `;
-        } else {
-            return `
-                <div class="advice-box needs-attention">
-                    <strong>⚡ Enhancement Opportunity!</strong> Your main entrance faces ${currentEntrance}. Consider astro-Vastu remedies to harmonize this direction with your personal energy. Your ideal directions are: ${favorableDirections?.join(', ') || 'Not calculated'}.
-                </div>
-            `;
-        }
-    }
-
-    getBestDirectionsForRoom(room) {
-        const roomDirectionRecommendations = {
-            'Entrance': ['North', 'East', 'Northeast'],
-            'Master Bedroom': ['South', 'Southwest', 'West'],
-            'Kitchen': ['Southeast', 'South', 'East'],
-            'Bathroom': ['Northwest', 'West', 'South'],
-            'Pooja Room': ['Northeast', 'North', 'East'],
-            'Living Room': ['North', 'East', 'Northeast']
-        };
-
-        const bestDirections = roomDirectionRecommendations[room] || [];
-        const currentDirection = this.lastCalculation.propertyDetails[this.getRoomKey(room)];
-        
-        return `
-            <div class="room-recommendations">
-                <div class="best-directions-label">Ideal Directions:</div>
-                <div class="best-directions-list">
-                    ${bestDirections.map(dir => 
-                        `<span class="mini-direction-badge ${dir === currentDirection ? 'current' : ''}">${dir}</span>`
-                    ).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    getOverallRoomClass(room) {
-        if (!this.lastCalculation) return 'average';
-        
-        const vastuScore = this.lastCalculation.roomScores[room] || 0;
-        const numerologyScore = this.lastCalculation.roomNumerologyScores?.[room] || 0;
-        const astrologyScore = this.astrologyAnalysis?.directionalCompatibility?.roomAnalysis?.[this.getRoomKey(room)]?.score || 0;
-        
-        const overallScore = Math.round((vastuScore * 0.5) + (numerologyScore * 0.25) + (astrologyScore * 0.25));
-        
-        return this.getScoreClass(overallScore);
-    }
-
-    showAstrologyLoading() {
-        const resultsDiv = document.getElementById('astrologyResults');
-        
-        resultsDiv.innerHTML = `
-            <div class="astrology-header">
-                <h3>🔮 Analyzing Your Astrological Profile...</h3>
-            </div>
-            <div class="astrology-loading">
-                <div class="spinner"></div>
-                <p>Calculating planetary positions and directional compatibility...</p>
-            </div>
-        `;
-        
-        resultsDiv.style.display = 'block';
-    }
-
-    displayAstrologyResults(results) {
-        const resultsDiv = document.getElementById('astrologyResults');
-        const { astrologyProfile, directionalCompatibility } = results;
-        
-        resultsDiv.innerHTML = `
-            <div class="astrology-header">
-                <h3>🔮 Your Astrological Profile & Property Compatibility</h3>
-            </div>
-            <div class="astrology-content">
-                <div class="astrology-section profile">
-                    <h4 class="astrology-section-title">
-                        <span>⭐</span>
-                        Personal Astrological Profile
-                    </h4>
-                    <div class="profile-grid">
-                        <div class="profile-item">
-                            <strong>Planetary Ruler:</strong> ${astrologyProfile.planetaryRuler}
-                        </div>
-                        <div class="profile-item">
-                            <strong>Moon Sign:</strong> ${astrologyProfile.moonSign}
-                        </div>
-                        <div class="profile-item">
-                            <strong>Birth Star:</strong> ${astrologyProfile.birthStar}
-                        </div>
-                        <div class="profile-item">
-                            <strong>Birth Element:</strong> ${astrologyProfile.birthElement}
-                        </div>
-                        <div class="profile-item">
-                            <strong>Life Number:</strong> ${astrologyProfile.lifeNumber}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="astrology-section compatibility">
-                    <h4 class="astrology-section-title">
-                        <span>🏠</span>
-                        Property Compatibility Analysis
-                    </h4>
-                    <div class="compatibility-score">
-                        <div class="score-circle astrology">
-                            <span class="score-value">${directionalCompatibility.overallScore}</span>
-                            <span class="score-label">/100</span>
-                        </div>
-                        <div class="score-interpretation">
-                            <h5>${this.getAstrologyScoreLevel(directionalCompatibility.overallScore)}</h5>
-                            <p>${directionalCompatibility.recommendation}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="astrology-meta">
-                <p>Analysis generated on: ${new Date().toLocaleString()}</p>
-            </div>
-        `;
-        
-        resultsDiv.style.display = 'block';
-        resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    formatRoomName(room) {
-        const names = {
-            'entrance': 'Main Entrance',
-            'masterBedroom': 'Master Bedroom',
-            'kitchen': 'Kitchen',
-            'bathroom': 'Bathroom',
-            'poojaRoom': 'Pooja Room',
-            'livingRoom': 'Living Room'
-        };
-        return names[room] || room;
-    }
-
-    getAstrologyScoreLevel(score) {
-        if (score >= 80) return 'Excellent Alignment';
-        if (score >= 65) return 'Good Compatibility';
-        if (score >= 45) return 'Moderate Alignment';
-        return 'Needs Astrological Remedies';
-    }
-
-    async generateAIRemedies() {
-        if (!this.lastCalculation) {
-            alert('Please calculate Vastu score first!');
-            return;
-        }
-
-        const button = document.getElementById('generateRemedies');
-        const loading = button.querySelector('.loading');
-
-        try {
-            button.disabled = true;
-            loading.style.display = 'inline';
-            this.showRemedyLoading();
-
-            const requestData = {
-                vastuAnalysis: {
-                    finalScore: this.lastCalculation.finalScore,
-                    roomScores: this.lastCalculation.roomScores,
-                    issues: this.identifyIssues()
-                },
-                buyerDetails: this.lastCalculation.buyerDetails,
-                propertyDetails: this.lastCalculation.propertyDetails,
-                astrologyAnalysis: this.astrologyAnalysis // Include astrology data
-            };
-
-            const response = await fetch(`${this.apiBaseUrl}/generate-vastu-remedies`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestData)
-            });
-
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status} - ${response.statusText}`);
-            }
-
-            const result = await response.json();
-            console.log('🔍 Raw remedy result:', result); // Debug log
-            this.displayRemedies(result.remedies);
-
-        } catch (error) {
-            console.error('❌ Failed to generate remedies:', error);
-            this.showRemedyError(error.message);
-        } finally {
-            button.disabled = false;
-            loading.style.display = 'none';
-        }
-    }
-
-    showAstrologyError(message) {
-        const resultsDiv = document.getElementById('astrologyResults');
-        
-        resultsDiv.innerHTML = `
-            <div class="astrology-header">
-                <h3>⚠️ Astrology Analysis Error</h3>
-            </div>
-            <div class="astrology-error">
-                <h4>❌ Unable to Complete Analysis</h4>
-                <p>${message}</p>
-                <button onclick="document.getElementById('astrologyResults').style.display='none'" class="btn-primary" style="margin-top: 15px;">
-                    Close
-                </button>
-            </div>
-        `;
-        
-        resultsDiv.style.display = 'block';
-    }
-
+    // VASTU HELPER FUNCTIONS (keeping all existing methods)
     getRoomScore(room, direction) {
         const scores = {
             'Entrance': {
@@ -647,7 +253,6 @@ class EnhancedVastuCalculator {
                 'Northeast': 95, 'Northwest': 85, 'Southeast': 75, 'Southwest': 50
             }
         };
-
         return scores[room]?.[direction] || 50;
     }
 
@@ -659,78 +264,204 @@ class EnhancedVastuCalculator {
         return scores[shape] || 50;
     }
 
-    getFloorScore(floor) {
-        if (floor === 0) return 85;
-        if (floor === 1) return 90;
-        if (floor === 2) return 85;
-        if (floor === 3) return 80;
-        if (floor === 4) return 75;
-        return 70;
+    // NUMEROLOGY HELPER FUNCTIONS
+    calculateBirthNumber(birthDate) {
+        const date = new Date(birthDate);
+        const dateStr = `${date.getDate()}${date.getMonth() + 1}${date.getFullYear()}`;
+        let total = dateStr.split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+        while (total > 9 && total !== 11 && total !== 22 && total !== 33) {
+            total = total.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+        }
+        return total;
     }
 
-    getNumerologyScore(birthDate, houseNumber) {
-        if (!birthDate) return 70;
-        const birthNum = this.calculateBirthNumber(birthDate);
-        const houseNum = this.calculateHouseNumber(houseNumber);
+    calculateHouseNumerology(houseNumber) {
+        let total = houseNumber.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+        while (total > 9 && total !== 11 && total !== 22 && total !== 33) {
+            total = total.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+        }
+        return total;
+    }
+
+    checkNumerologyCompatibility(birthNum, houseNum) {
         const compatibility = {
             1: [1, 3, 5, 7, 9], 2: [2, 4, 6, 8], 3: [1, 3, 6, 9],
             4: [1, 2, 4, 7, 8], 5: [1, 5, 9], 6: [2, 3, 6, 9],
             7: [1, 4, 7], 8: [2, 4, 6, 8], 9: [1, 3, 5, 6, 9]
         };
-        return compatibility[birthNum]?.includes(houseNum) ? 90 : 70;
-    }
 
-    calculateBirthNumber(birthDate) {
-        const date = new Date(birthDate);
-        const dateStr = `${date.getDate()}${date.getMonth() + 1}${date.getFullYear()}`;
-        let total = dateStr.split('').reduce((sum, digit) => sum + parseInt(digit), 0);
-        while (total > 9) {
-            total = total.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
-        }
-        return total;
-    }
-
-    calculateHouseNumber(houseNo) {
-        let total = houseNo.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
-        while (total > 9) {
-            total = total.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
-        }
-        return total;
-    }
-
-    getInterpretation(score) {
-        if (score >= 85) return { level: 'Excellent', desc: 'Outstanding multi-dimensional alignment' };
-        if (score >= 70) return { level: 'Good', desc: 'Favorable alignment with minor improvements needed' };
-        if (score >= 55) return { level: 'Average', desc: 'Moderate compliance, targeted remedies recommended' };
-        return { level: 'Poor', desc: 'Significant issues, comprehensive remedies needed' };
-    }
-
-    displayResults(results) {
-        const resultsSection = document.getElementById('results');
-        const finalScore = document.getElementById('finalScore');
-        const interpretation = document.getElementById('interpretation');
-        const description = document.getElementById('description');
-
-        resultsSection.style.display = 'block';
-        resultsSection.scrollIntoView({ behavior: 'smooth' });
-
-        finalScore.textContent = results.finalScore;
-        interpretation.textContent = results.interpretation.level;
-        description.textContent = results.interpretation.desc;
-
-        const scoreCircle = document.querySelector('.score-circle');
-        scoreCircle.className = 'score-circle ' + results.interpretation.level.toLowerCase();
-
-        // Use the new multi-dimensional analysis display
-        this.displayMultiDimensionalAnalysis();
-    }
-
-    getRoomKey(roomName) {
-        const mapping = {
-            'Entrance': 'entrance', 'Master Bedroom': 'masterBedroom', 'Kitchen': 'kitchen',
-            'Bathroom': 'bathroom', 'Pooja Room': 'poojaRoom', 'Living Room': 'livingRoom'
+        const isCompatible = compatibility[birthNum]?.includes(houseNum);
+        
+        return {
+            score: isCompatible ? 90 : 45,
+            status: isCompatible ? 'Excellent Match' : 'Needs Attention',
+            interpretation: isCompatible ? 
+                'Your house number is perfectly aligned with your birth energy.' :
+                'Your house number may create energy conflicts. Remedies recommended.'
         };
-        return mapping[roomName] || '';
+    }
+
+    // ASTROLOGY HELPER FUNCTIONS
+    calculateAstrologyProfile(personalDetails) {
+        const birthDate = new Date(personalDetails.birthDate);
+        const dayOfWeek = birthDate.getDay();
+        const birthMonth = birthDate.getMonth() + 1;
+        const birthDay = birthDate.getDate();
+        
+        const planetaryRuler = this.getPlanetaryRuler(dayOfWeek);
+        const moonSign = this.getMoonSign(birthMonth, birthDay);
+        const birthStar = this.getBirthStar(this.getDayOfYear(birthDate));
+        const favorableDirections = this.getFavorableDirections(planetaryRuler, moonSign);
+        
+        return {
+            planetaryRuler,
+            moonSign,
+            birthStar,
+            favorableDirections
+        };
+    }
+
+    getPlanetaryRuler(dayOfWeek) {
+        const rulers = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+        return rulers[dayOfWeek];
+    }
+
+    getMoonSign(month, day) {
+        const signs = ['Capricorn', 'Aquarius', 'Pisces', 'Aries', 'Taurus', 'Gemini',
+                      'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius'];
+        let signIndex = (month - 1 + Math.floor(day / 15)) % 12;
+        return signs[signIndex];
+    }
+
+    getBirthStar(dayOfYear) {
+        const nakshatras = ['Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra', 
+                           'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni'];
+        const index = Math.floor((dayOfYear * 27) / 365) % 27;
+        return nakshatras[index % 11]; // Simplified for demo
+    }
+
+    getDayOfYear(date) {
+        const start = new Date(date.getFullYear(), 0, 0);
+        const diff = date - start;
+        return Math.floor(diff / (1000 * 60 * 60 * 24));
+    }
+
+    getFavorableDirections(planetaryRuler, moonSign) {
+        const planetaryDirections = {
+            'Sun': ['East', 'Northeast'], 'Moon': ['Northwest', 'North'],
+            'Mars': ['South', 'Southeast'], 'Mercury': ['North', 'Northeast'],
+            'Jupiter': ['Northeast', 'East'], 'Venus': ['Southeast', 'South'],
+            'Saturn': ['West', 'Southwest']
+        };
+        return planetaryDirections[planetaryRuler] || ['East', 'North'];
+    }
+
+    checkDirectionCompatibility(favorableDirections, houseDirection) {
+        const isCompatible = favorableDirections.includes(houseDirection);
+        
+        return {
+            score: isCompatible ? 95 : 40,
+            status: isCompatible ? 'Perfect Alignment' : 'Conflicting Energy',
+            interpretation: isCompatible ?
+                'Your house direction perfectly matches your astrological profile.' :
+                'Your house direction conflicts with your natural energy flow. Remedies needed.'
+        };
+    }
+
+    getScoreInterpretation(score) {
+        if (score >= 85) return { level: 'Excellent', desc: 'Outstanding alignment' };
+        if (score >= 70) return { level: 'Good', desc: 'Generally favorable with minor improvements' };
+        if (score >= 55) return { level: 'Average', desc: 'Moderate, remedies recommended' };
+        return { level: 'Poor', desc: 'Significant issues, urgent remedies needed' };
+    }
+
+    // Helper function to get score color class
+    getScoreColorClass(score) {
+        return score > 80 ? 'score-good' : 'score-poor';
+    }
+
+    // DISPLAY FUNCTIONS
+    displayResults(vastuAnalysis, numerologyAnalysis, astrologyAnalysis) {
+        // Show results section
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+
+        // Display Vastu Analysis
+        this.displayVastuResults(vastuAnalysis);
+        
+        // Display Numerology Analysis
+        this.displayNumerologyResults(numerologyAnalysis);
+        
+        // Display Astrology Analysis
+        this.displayAstrologyResults(astrologyAnalysis);
+    }
+
+    displayVastuResults(analysis) {
+        document.getElementById('vastuScore').textContent = analysis.score;
+        document.getElementById('vastuInterpretation').textContent = analysis.interpretation.level;
+        document.getElementById('vastuDescription').textContent = analysis.interpretation.desc;
+
+        const roomBreakdown = document.getElementById('vastuRoomBreakdown');
+        roomBreakdown.innerHTML = '';
+        
+        // Add plot shape score first
+        const plotElement = document.createElement('div');
+        plotElement.className = `room-item ${this.getScoreClass(analysis.plotShapeScore)}`;
+        plotElement.innerHTML = `
+            <div class="room-name">Plot Shape (${analysis.plotShape})</div>
+            <div class="room-score ${this.getScoreColorClass(analysis.plotShapeScore)}">${analysis.plotShapeScore}/100</div>
+        `;
+        roomBreakdown.appendChild(plotElement);
+        
+        // Add room scores
+        Object.entries(analysis.roomScores).forEach(([room, score]) => {
+            const roomElement = document.createElement('div');
+            roomElement.className = `room-item ${this.getScoreClass(score)}`;
+            roomElement.innerHTML = `
+                <div class="room-name">${room}</div>
+                <div class="room-score ${this.getScoreColorClass(score)}">${score}/100</div>
+            `;
+            roomBreakdown.appendChild(roomElement);
+        });
+
+        // Show/hide remedy button based on score
+        const remedySection = document.querySelector('.vastu-section .remedy-section');
+        if (analysis.score < 80) {
+            remedySection.style.display = 'block';
+        } else {
+            remedySection.style.display = 'none';
+        }
+    }
+
+    displayNumerologyResults(analysis) {
+        document.getElementById('numerologyScore').textContent = analysis.score;
+        document.getElementById('birthNumber').textContent = analysis.birthNumber;
+        document.getElementById('displayHouseNumber').textContent = analysis.houseNumber;
+        document.getElementById('houseNumerology').textContent = analysis.houseNumerology;
+        document.getElementById('numerologyCompatibility').textContent = analysis.compatibility;
+        document.getElementById('numerologyCompatibility').className = 
+            analysis.score >= 70 ? 'compatible' : 'incompatible';
+    }
+
+    displayAstrologyResults(analysis) {
+        document.getElementById('astrologyScore').textContent = analysis.score;
+        document.getElementById('planetaryRuler').textContent = analysis.profile.planetaryRuler;
+        document.getElementById('moonSign').textContent = analysis.profile.moonSign;
+        document.getElementById('birthStar').textContent = analysis.profile.birthStar;
+
+        // Display favorable directions
+        const favorableDiv = document.getElementById('favorableDirections');
+        favorableDiv.innerHTML = analysis.profile.favorableDirections
+            .map(dir => `<span class="direction-badge favorable">${dir}</span>`).join('');
+
+        // Display house direction
+        const houseDir = document.getElementById('currentHouseDirection');
+        houseDir.innerHTML = `<span class="direction-badge current">${analysis.houseDirection}</span>`;
+
+        // Display compatibility
+        const compatibility = document.getElementById('directionCompatibility');
+        compatibility.textContent = analysis.compatibility;
+        compatibility.className = analysis.score >= 70 ? 'compatible' : 'incompatible';
     }
 
     getScoreClass(score) {
@@ -740,98 +471,345 @@ class EnhancedVastuCalculator {
         return 'poor';
     }
 
-    showRemedyLoading() {
-        const resultsDiv = document.getElementById('remedyResults');
-        
-        resultsDiv.innerHTML = `
-            <div class="remedy-header">
-                <h3>🤖 Generating Enhanced AI Remedies...</h3>
-            </div>
-            <div class="remedy-loading">
-                <div class="spinner"></div>
-                <p>Creating personalized Vastu-Astrology-Numerology remedies based on your profile...</p>
-            </div>
-        `;
-        
-        resultsDiv.style.display = 'block';
+    // REMEDY GENERATION
+    async generateRemedies(analysisType) {
+        const button = document.getElementById(`generate${analysisType.charAt(0).toUpperCase() + analysisType.slice(1)}Remedies`);
+        const resultsDiv = document.getElementById(`${analysisType}RemedyResults`);
+        const loading = button.querySelector('.loading');
+
+        try {
+            button.disabled = true;
+            loading.style.display = 'inline';
+            
+            // Show loading
+            resultsDiv.innerHTML = `
+                <div class="remedy-loading">
+                    <div class="spinner"></div>
+                    <p>Generating personalized ${analysisType} remedies...</p>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+
+            const response = await fetch(`${this.apiBaseUrl}/generate-remedies`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    analysisType,
+                    personalDetails: this.analysisData.personalDetails,
+                    propertyDetails: this.analysisData.propertyDetails
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            // Store remedies for PDF generation
+            this.generatedRemedies[analysisType] = result.remedies;
+            
+            this.displayRemedies(analysisType, result.remedies);
+
+        } catch (error) {
+            console.error('Failed to generate remedies:', error);
+            this.showRemedyError(analysisType, error.message);
+        } finally {
+            button.disabled = false;
+            loading.style.display = 'none';
+        }
     }
 
-    displayRemedies(remedies) {
-        console.log('🔍 Displaying remedies:', remedies);
+    displayRemedies(analysisType, remedies) {
+        const resultsDiv = document.getElementById(`${analysisType}RemedyResults`);
         
-        const resultsDiv = document.getElementById('remedyResults');
-        
-        // Simple approach - just display the content directly with basic formatting
         let content = remedies.content || 'No content received';
         
         // Clean up escaped characters
         content = content
-            .replace(/\n/g, '<br>')
+            .replace(/\\n/g, '\n')
             .replace(/\\\*/g, '')
             .replace(/\*\*/g, '')
-            .replace(/\\"/g, '"')
-            .replace(/\\\[/g, '[')
-            .replace(/\\\]/g, ']');
-        
-        console.log('🔍 Cleaned content:', content);
-        
+            .replace(/\\"/g, '"');
+
+        // Parse numbered remedies
+        const remedyList = this.parseRemedies(content);
+
+        const typeLabels = {
+            vastu: 'Vastu Shastra',
+            numerology: 'Numerology',
+            astrology: 'Astrological'
+        };
+
+        const typeIcons = {
+            vastu: '🏠',
+            numerology: '🔢',
+            astrology: '⭐'
+        };
+
         resultsDiv.innerHTML = `
-            <div class="remedy-header">
-                <h3>🤖 Enhanced Multi-Dimensional Remedies</h3>
-            </div>
             <div class="remedy-content">
-                <div class="remedy-section general">
-                    <h4 class="remedy-section-title">
-                        <span>💡</span>
-                        Your Personalized Remedies
-                    </h4>
-                    <div style="line-height: 1.8; font-size: 15px; white-space: pre-wrap;">
-                        ${content}
-                    </div>
+                <div class="remedy-header">
+                    <h4>${typeIcons[analysisType]} ${typeLabels[analysisType]} Remedies</h4>
+                    <p class="remedy-subtitle">Practical solutions to improve your ${analysisType} alignment</p>
+                </div>
+                <div class="remedy-list">
+                    ${remedyList.map((remedy, index) => `
+                        <div class="remedy-item">
+                            <div class="remedy-number">${index + 1}</div>
+                            <div class="remedy-text">${remedy}</div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
             <div class="remedy-meta">
-                <p>Enhanced analysis generated on: ${new Date().toLocaleString()} | Model: ${remedies.model || 'gpt-4o'} | Chunks: ${remedies.chunks || 'N/A'}</p>
+                <p>Generated on: ${new Date().toLocaleString()}</p>
             </div>
         `;
-        
-        resultsDiv.style.display = 'block';
-        resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        
-        console.log('✅ Remedies displayed successfully');
     }
 
-    identifyIssues() {
-        const issues = [];
-        if (this.lastCalculation) {
-            Object.entries(this.lastCalculation.roomScores).forEach(([room, score]) => {
-                if (score < 60) {
-                    issues.push(`${room} scoring low (${score}/100)`);
+    parseRemedies(content) {
+        // Split by lines and filter for numbered remedies
+        const lines = content.split('\n').filter(line => line.trim());
+        const remedies = [];
+        
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            // Look for numbered items (1., 2., etc.) or bullet points
+            if (trimmedLine.match(/^\d+\./) || trimmedLine.match(/^[-•*]/) || 
+                (trimmedLine.length > 20 && !trimmedLine.includes(':'))) {
+                let remedy = trimmedLine
+                    .replace(/^\d+\.\s*/, '') // Remove numbering
+                    .replace(/^[-•*]\s*/, '') // Remove bullet points
+                    .trim();
+                
+                if (remedy.length > 10) {
+                    remedies.push(remedy);
                 }
-            });
+            }
         }
-        return issues;
+        
+        // If no numbered remedies found, split by sentences
+        if (remedies.length === 0) {
+            const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20);
+            return sentences.slice(0, 7); // Max 7 remedies
+        }
+        
+        return remedies.slice(0, 7); // Max 7 remedies
     }
 
-    showRemedyError(message) {
-        const resultsDiv = document.getElementById('remedyResults');
-        
+    showRemedyError(analysisType, message) {
+        const resultsDiv = document.getElementById(`${analysisType}RemedyResults`);
         resultsDiv.innerHTML = `
-            <div class="remedy-header">
-                <h3>⚠️ Unable to Generate Remedies</h3>
-            </div>
             <div class="remedy-error">
-                <h4>❌ Error Occurred</h4>
+                <h4>❌ Unable to Generate Remedies</h4>
                 <p>${message}</p>
-                <button onclick="document.getElementById('remedyResults').style.display='none'" class="btn-primary" style="margin-top: 15px;">
-                    Close
-                </button>
             </div>
         `;
-        
-        resultsDiv.style.display = 'block';
+    }
+
+    // PDF GENERATION FUNCTION
+    async downloadPDFReport() {
+        const button = document.getElementById('downloadReport');
+        const loading = button.querySelector('.download-loading');
+
+        try {
+            button.disabled = true;
+            loading.style.display = 'inline';
+
+            // Check if jsPDF is available
+            if (typeof window.jsPDF === 'undefined') {
+                throw new Error('PDF library not loaded');
+            }
+
+            const { jsPDF } = window.jsPDF;
+            const doc = new jsPDF();
+
+            // Set initial position
+            let yPosition = 20;
+            const pageHeight = doc.internal.pageSize.height;
+            const margin = 20;
+
+            // Helper function to check if we need a new page
+            const checkNewPage = (requiredSpace = 20) => {
+                if (yPosition + requiredSpace > pageHeight - margin) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+            };
+
+            // Title
+            doc.setFontSize(20);
+            doc.setFont(undefined, 'bold');
+            doc.text('Complete Vastu-Astrology-Numerology Report', margin, yPosition);
+            yPosition += 15;
+
+            // Personal Details
+            doc.setFontSize(14);
+            doc.text('Personal Information', margin, yPosition);
+            yPosition += 10;
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Name: ${this.analysisData.personalDetails.name}`, margin, yPosition);
+            yPosition += 7;
+            doc.text(`Birth Date: ${this.analysisData.personalDetails.birthDate}`, margin, yPosition);
+            yPosition += 7;
+            doc.text(`Birth Place: ${this.analysisData.personalDetails.birthPlace}`, margin, yPosition);
+            yPosition += 7;
+            doc.text(`House Number: ${this.analysisData.propertyDetails.houseNumber}`, margin, yPosition);
+            yPosition += 7;
+            doc.text(`House Direction: ${this.analysisData.propertyDetails.houseDirection}`, margin, yPosition);
+            yPosition += 15;
+
+            checkNewPage(30);
+
+            // Vastu Analysis
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('🏠 Vastu Analysis', margin, yPosition);
+            yPosition += 10;
+
+            doc.setFontSize(12);
+            doc.text(`Score: ${this.vastuAnalysis.score}/100 - ${this.vastuAnalysis.interpretation.level}`, margin, yPosition);
+            yPosition += 7;
+            doc.setFontSize(10);
+            doc.text(`${this.vastuAnalysis.interpretation.desc}`, margin, yPosition);
+            yPosition += 10;
+
+            // Room Scores
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Room Scores:', margin, yPosition);
+            yPosition += 7;
+            doc.setFont(undefined, 'normal');
+            
+            doc.text(`Plot Shape (${this.vastuAnalysis.plotShape}): ${this.vastuAnalysis.plotShapeScore}/100`, margin, yPosition);
+            yPosition += 6;
+            
+            Object.entries(this.vastuAnalysis.roomScores).forEach(([room, score]) => {
+                checkNewPage(8);
+                doc.text(`${room}: ${score}/100`, margin, yPosition);
+                yPosition += 6;
+            });
+            yPosition += 10;
+
+            // Vastu Remedies
+            if (this.generatedRemedies.vastu) {
+                checkNewPage(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('Vastu Remedies:', margin, yPosition);
+                yPosition += 7;
+                doc.setFont(undefined, 'normal');
+                
+                const vastuRemedyList = this.parseRemedies(this.generatedRemedies.vastu.content);
+                vastuRemedyList.forEach((remedy, index) => {
+                    checkNewPage(12);
+                    const remedyText = `${index + 1}. ${remedy}`;
+                    const lines = doc.splitTextToSize(remedyText, 170);
+                    doc.text(lines, margin, yPosition);
+                    yPosition += lines.length * 5 + 3;
+                });
+            }
+            yPosition += 10;
+
+            checkNewPage(30);
+
+            // Numerology Analysis
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('🔢 Numerology Analysis', margin, yPosition);
+            yPosition += 10;
+
+            doc.setFontSize(12);
+            doc.text(`Score: ${this.numerologyAnalysis.score}/100 - ${this.numerologyAnalysis.compatibility}`, margin, yPosition);
+            yPosition += 7;
+            doc.setFontSize(10);
+            doc.text(`Birth Number: ${this.numerologyAnalysis.birthNumber}`, margin, yPosition);
+            yPosition += 6;
+            doc.text(`House Numerology: ${this.numerologyAnalysis.houseNumerology}`, margin, yPosition);
+            yPosition += 6;
+            doc.text(`${this.numerologyAnalysis.interpretation}`, margin, yPosition);
+            yPosition += 10;
+
+            // Numerology Remedies
+            if (this.generatedRemedies.numerology) {
+                checkNewPage(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('Numerology Remedies:', margin, yPosition);
+                yPosition += 7;
+                doc.setFont(undefined, 'normal');
+                
+                const numerologyRemedyList = this.parseRemedies(this.generatedRemedies.numerology.content);
+                numerologyRemedyList.forEach((remedy, index) => {
+                    checkNewPage(12);
+                    const remedyText = `${index + 1}. ${remedy}`;
+                    const lines = doc.splitTextToSize(remedyText, 170);
+                    doc.text(lines, margin, yPosition);
+                    yPosition += lines.length * 5 + 3;
+                });
+            }
+            yPosition += 10;
+
+            checkNewPage(30);
+
+            // Astrology Analysis
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('⭐ Astrology Analysis', margin, yPosition);
+            yPosition += 10;
+
+            doc.setFontSize(12);
+            doc.text(`Score: ${this.astrologyAnalysis.score}/100 - ${this.astrologyAnalysis.compatibility}`, margin, yPosition);
+            yPosition += 7;
+            doc.setFontSize(10);
+            doc.text(`Planetary Ruler: ${this.astrologyAnalysis.profile.planetaryRuler}`, margin, yPosition);
+            yPosition += 6;
+            doc.text(`Moon Sign: ${this.astrologyAnalysis.profile.moonSign}`, margin, yPosition);
+            yPosition += 6;
+            doc.text(`Birth Star: ${this.astrologyAnalysis.profile.birthStar}`, margin, yPosition);
+            yPosition += 6;
+            doc.text(`Favorable Directions: ${this.astrologyAnalysis.profile.favorableDirections.join(', ')}`, margin, yPosition);
+            yPosition += 6;
+            doc.text(`${this.astrologyAnalysis.interpretation}`, margin, yPosition);
+            yPosition += 10;
+
+            // Astrology Remedies
+            if (this.generatedRemedies.astrology) {
+                checkNewPage(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('Astrological Remedies:', margin, yPosition);
+                yPosition += 7;
+                doc.setFont(undefined, 'normal');
+                
+                const astrologyRemedyList = this.parseRemedies(this.generatedRemedies.astrology.content);
+                astrologyRemedyList.forEach((remedy, index) => {
+                    checkNewPage(12);
+                    const remedyText = `${index + 1}. ${remedy}`;
+                    const lines = doc.splitTextToSize(remedyText, 170);
+                    doc.text(lines, margin, yPosition);
+                    yPosition += lines.length * 5 + 3;
+                });
+            }
+
+            // Footer
+            checkNewPage(15);
+            doc.setFontSize(9);
+            doc.text(`Report generated on: ${new Date().toLocaleString()}`, margin, yPosition);
+
+            // Save the PDF
+            const fileName = `Complete_Analysis_Report_${this.analysisData.personalDetails.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+
+        } catch (error) {
+            console.error('Failed to generate PDF:', error);
+            alert('Failed to generate PDF report. Please try again.');
+        } finally {
+            button.disabled = false;
+            loading.style.display = 'none';
+        }
     }
 }
 
-// Initialize the enhanced calculator
-const calculator = new EnhancedVastuCalculator();
+// Initialize the calculator
+const calculator = new ComprehensiveVastuCalculator();

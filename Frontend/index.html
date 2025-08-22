@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Multi-Dimensional Vastu Calculator</title>
+    <title>Complete Vastu-Astrology-Numerology Calculator</title>
     <link rel="stylesheet" href="style.css">
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>🏠 Enhanced Multi-Dimensional Vastu Calculator</h1>
-            <p>Comprehensive property analysis combining Vastu principles, numerological harmony, and personalized astrological insights for optimal living spaces</p>
+            <h1>🏠 Complete Vastu-Astrology-Numerology Calculator</h1>
+            <p>Get comprehensive property analysis with separate Vastu, Numerology, and Astrological insights with personalized remedies</p>
         </header>
 
         <!-- Main Form -->
@@ -19,7 +21,7 @@
             <form id="vastuForm" class="vastu-form">
                 <!-- Buyer Details -->
                 <div class="card">
-                    <h3>👤 Personal Details for Multi-Dimensional Analysis</h3>
+                    <h3>👤 Personal Details</h3>
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="name">Full Name *</label>
@@ -149,71 +151,176 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="floorNumber">Floor Number *</label>
-                            <input type="number" id="floorNumber" name="floorNumber" required min="0" max="100" placeholder="Enter floor number (0 for ground)">
-                        </div>
-                        <div class="form-group">
                             <label for="houseNumber">House/Flat Number *</label>
                             <input type="number" id="houseNumber" name="houseNumber" required min="1" placeholder="Enter house/flat number">
+                        </div>
+                        <div class="form-group">
+                            <label for="houseDirection">House/Building Direction *</label>
+                            <select id="houseDirection" name="houseDirection" required>
+                                <option value="">Select House Direction</option>
+                                <option value="North">North Facing</option>
+                                <option value="East">East Facing</option>
+                                <option value="South">South Facing</option>
+                                <option value="West">West Facing</option>
+                                <option value="Northeast">Northeast Facing</option>
+                                <option value="Northwest">Northwest Facing</option>
+                                <option value="Southeast">Southeast Facing</option>
+                                <option value="Southwest">Southwest Facing</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
                 <!-- Calculate Button -->
                 <div class="button-section">
-                    <button type="submit" class="btn-primary">🔮 Calculate Multi-Dimensional Score</button>
+                    <button type="submit" class="btn-primary">🔮 Analyze Property</button>
                 </div>
             </form>
         </div>
 
         <!-- Results Section -->
         <div id="results" class="results-section" style="display: none;">
-            <!-- Score Display -->
-            <div class="score-display">
-                <div class="score-circle">
-                    <div class="score-text">
-                        <span id="finalScore">0</span>
-                        <small>/100</small>
+            
+            <!-- Vastu Analysis Section -->
+            <div class="analysis-section vastu-section">
+                <div class="section-header">
+                    <h2>🏠 Vastu Analysis</h2>
+                    <div class="score-circle vastu-score">
+                        <div class="score-text">
+                            <span id="vastuScore">0</span>
+                            <small>/100</small>
+                        </div>
                     </div>
                 </div>
-                <div class="score-interpretation">
-                    <h3 id="interpretation">Calculating...</h3>
-                    <p id="description">Please wait while we analyze your property with multiple dimensions...</p>
+                
+                <div class="section-content">
+                    <div class="score-interpretation">
+                        <h3 id="vastuInterpretation">Calculating...</h3>
+                        <p id="vastuDescription">Analyzing room directions and plot shape...</p>
+                    </div>
+                    
+                    <div class="room-breakdown">
+                        <h4>Room-wise Vastu Scores:</h4>
+                        <div id="vastuRoomBreakdown" class="room-grid"></div>
+                    </div>
+                    
+                    <div class="remedy-section">
+                        <button id="generateVastuRemedies" class="btn-remedy vastu-remedy">
+                            🔧 Get Vastu Remedies
+                            <span class="loading" style="display: none;"><div class="spinner"></div></span>
+                        </button>
+                        <div id="vastuRemedyResults" class="remedy-container" style="display: none;"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Multi-Dimensional Analysis -->
-            <div class="breakdown-section">
-                <h3>🎯 Comprehensive Multi-Dimensional Analysis</h3>
-                <p style="text-align: center; color: #718096; margin-bottom: 25px;">
-                    Detailed evaluation combining Vastu principles, numerology compatibility, and astrological alignment
-                </p>
-                <div id="roomBreakdown" class="room-grid"></div>
+            <!-- Numerology Analysis Section -->
+            <div class="analysis-section numerology-section">
+                <div class="section-header">
+                    <h2>🔢 Numerology Analysis</h2>
+                    <div class="score-circle numerology-score">
+                        <div class="score-text">
+                            <span id="numerologyScore">0</span>
+                            <small>/100</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-content">
+                    <div class="numerology-details">
+                        <div class="number-analysis">
+                            <div class="number-item">
+                                <strong>Your Birth Number:</strong> <span id="birthNumber">-</span>
+                            </div>
+                            <div class="number-item">
+                                <strong>House Number:</strong> <span id="displayHouseNumber">-</span>
+                            </div>
+                            <div class="number-item">
+                                <strong>House Numerology:</strong> <span id="houseNumerology">-</span>
+                            </div>
+                            <div class="compatibility-status">
+                                <strong>Compatibility:</strong> <span id="numerologyCompatibility">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="remedy-section">
+                        <button id="generateNumerologyRemedies" class="btn-remedy numerology-remedy">
+                            🔮 Get Numerology Remedies
+                            <span class="loading" style="display: none;"><div class="spinner"></div></span>
+                        </button>
+                        <div id="numerologyRemedyResults" class="remedy-container" style="display: none;"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Astrology Analysis Section -->
-            <div class="astrology-section">
-                <button id="analyzeAstrology" class="btn-astrology">
-                    🔮 Analyze Astrological Compatibility
-                    <span class="loading" style="display: none;">
-                        <div class="spinner"></div>
-                    </span>
-                </button>
-                <div id="astrologyResults" class="astrology-container" style="display: none;">
-                    <!-- Astrology analysis results will be inserted here -->
+            <div class="analysis-section astrology-section">
+                <div class="section-header">
+                    <h2>⭐ Astrology Analysis</h2>
+                    <div class="score-circle astrology-score">
+                        <div class="score-text">
+                            <span id="astrologyScore">0</span>
+                            <small>/100</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-content">
+                    <div class="astrology-details">
+                        <div class="profile-summary">
+                            <div class="profile-item">
+                                <strong>Planetary Ruler:</strong> <span id="planetaryRuler">-</span>
+                            </div>
+                            <div class="profile-item">
+                                <strong>Moon Sign:</strong> <span id="moonSign">-</span>
+                            </div>
+                            <div class="profile-item">
+                                <strong>Birth Star:</strong> <span id="birthStar">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="direction-analysis">
+                            <div class="direction-comparison">
+                                <div class="your-directions">
+                                    <h5>Your Favorable Directions:</h5>
+                                    <div id="favorableDirections" class="direction-badges"></div>
+                                </div>
+                                <div class="house-direction">
+                                    <h5>Your House Direction:</h5>
+                                    <div id="currentHouseDirection" class="direction-badges"></div>
+                                </div>
+                                <div class="compatibility-result">
+                                    <h5>Direction Compatibility:</h5>
+                                    <div id="directionCompatibility" class="compatibility-indicator"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="remedy-section">
+                        <button id="generateAstrologyRemedies" class="btn-remedy astrology-remedy">
+                            ✨ Get Astrological Remedies
+                            <span class="loading" style="display: none;"><div class="spinner"></div></span>
+                        </button>
+                        <div id="astrologyRemedyResults" class="remedy-container" style="display: none;"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- AI Remedies Section -->
-            <div class="ai-section">
-                <button id="generateRemedies" class="btn-ai">
-                    🤖 Get Enhanced Multi-Dimensional Remedies
-                    <span class="loading" style="display: none;">
-                        <div class="spinner"></div>
-                    </span>
-                </button>
-                <div id="remedyResults" class="remedy-container" style="display: none;">
-                    <!-- AI-generated content will be inserted here -->
+            <!-- PDF Download Section -->
+            <div class="download-section">
+                <div class="download-card">
+                    <div class="download-content">
+                        <h3>📄 Complete Analysis Report</h3>
+                        <p>Download your comprehensive Vastu, Numerology, and Astrology analysis with all remedies in PDF format</p>
+                        <button id="downloadReport" class="btn-download">
+                            📥 Download Complete Report
+                            <span class="download-loading" style="display: none;">
+                                <div class="spinner"></div>
+                            </span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
